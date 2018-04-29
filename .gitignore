@@ -1,0 +1,5 @@
+*.mrc
+*.mrcs
+
+# Ignore python compile file
+*.pyc

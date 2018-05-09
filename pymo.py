@@ -15,6 +15,7 @@ class MotionCorr(object):
 
 
 if __name__ == '__main__':
+    '''
     mrcf = mrc.open('test.mrc')
     # print(mrcf)
     print(mrcf.imageShape)
@@ -36,8 +37,19 @@ if __name__ == '__main__':
     mrc.write(mrcf.filename + '_cropped.mrc',
               cropped_mrc, mrcfh=mrcf.filehandle)
     print('Fininshed writing to disk')
-
-    #
+    '''
+    # -------Do fft on Cropped img-------
+    cropped_mrc = mrc.open('test_cropped.mrc')
+    ffted_mrc = np.zeros(cropped_mrc.mrc.data.shape, dtype=np.float32)
+    print(cropped_mrc.imageShape, ffted_mrc.shape
+          )
+    print(cropped_mrc.getFilename(origin=True))
+    print('-' * 10 + 'Image Start Doing FFT' + '-' * 10)
+    for i in tqdm(range(cropped_mrc.frameNums), ncols=60):
+        ffted_mrc[i] = np.fft.fft2(cropped_mrc[i])
+    mrc.write(cropped_mrc.getFilename(origin=True) + '_ffted.mrc',
+              ffted_mrc, mrcfh=cropped_mrc.filehandle)
+    print('-' * 10 + 'Fininshed writing to disk' + '-' * 10)
 
     # ffted_mrc = np.zeros(mrcf.data.shape)
     # for i in range(len(mrc.frameNums)):

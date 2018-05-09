@@ -63,7 +63,16 @@ class Mrc(object):
 
     @property
     def filename(self):
-        return self.filehandle[:-4]
+        return self.getFilename()
+
+    def getFilename(self, origin=False):
+        if origin:
+            if self.filehandle.find('_'):
+                return self.filehandle[:self.filehandle.find('_')]
+            else:
+                return self.filehandle[:self.filehandle.find('.')]
+        else:
+            return self.filehandle[:self.filehandle.find('.')]
 
     def writePng(self, frame_i=None, scaleFactor=10):
         new_shape = (int(self.imageShape[0] / scaleFactor),

@@ -2,6 +2,9 @@ import mrcfile
 import numpy as np
 import copy
 import os
+import scipy.misc as misc
+from skimage.exposure import rescale_intensity
+from tqdm import tqdm
 
 
 class Mrc(object):
@@ -15,11 +18,6 @@ class Mrc(object):
         super(Mrc, self).__init__()
         self.filehandle = filehandle
         self.mrc = mrcfile.mmap(filehandle, mode='r')
-        if self.mrc.is_image_stack():
-            self.__ImgStack__ = True
-        else:
-            self.__ImgStack__ = False
-
         if validate:
             print('*' * 20 + 'Validating start' + '*' * 20)
             if not mrcfile.validate(filehandle):
@@ -67,6 +65,33 @@ class Mrc(object):
     def filename(self):
         return self.filehandle[:-4]
 
+    def writePng(self, frame_i=None, scaleFactor=10):
+        new_shape = (int(self.imageShape[0] / scaleFactor),
+                     int(self.imageShape[1] / scaleFactor))
+        imgPath = self.filename + '_png'
+        if not os.path.isdir(imgPath):
+            os.mkdir(imgPath)
+        # Write all frames to png
+        if not frame_i:
+            print('Writing Png Img...')
+            for i in tqdm(range(self.frameNums), ncols=60):
+                frame_i_data = rescale_intensity(
+                    misc.imresize(self.frame(i), new_shape))
+                misc.imsave(os.path.join(imgPath, self.filename +
+                                         '_' + str(i) + '.png'),
+                            frame_i_data)
+            print('Writing Png Img Finished')
+        # Write specific frame to png
+        else:
+            print('Writing ' + str(frame_i) + ' Png Img...')
+            frame_i_data = frame_i_data = rescale_intensity(
+                misc.imresize(self.frame(i), new_shape))
+            misc.imsave(os.path.join(imgPath, self.filename +
+                                     '_' + str(frame_i) + '._png'),
+                        frame_i_data)
+            print('Writing Png Img Finished')
+        return frame_i_data
+
     @classmethod
     def open(cls, filepath):
         mrcf = Mrc(filepath)
@@ -107,7 +132,7 @@ class Mrc(object):
         return filehandle
 
     def frame(self, i):
-        if self.__ImgStack__:
+        if self.frameNums > 1:
             return self.mrc.data[i]
         else:
             raise ValueError(

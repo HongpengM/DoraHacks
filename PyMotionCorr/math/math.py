@@ -1,13 +1,13 @@
 try:
-    from Core import requirements
+    from Core.requirements import *
 except Exception as e:
-    from ..Core import requirements
-import numpy as np
-from numpy.fft import fft, fft2, ifft, ifft2, fftshift
-from scipy.signal import fftconvolve
-from scipy.signal import correlate2d
-from numpy.linalg import lstsq, matrix_rank
-from skimage.feature import register_translation
+    try:
+        from ..Core.requirements import *
+    except Exception as e:
+        import sys
+        import os
+        sys.path.append(os.path.abspath(os.path.join('..', 'Core')))
+        from requirements import *
 
 
 class Math(object):
@@ -70,7 +70,7 @@ class Math(object):
         Iteratively Solve: A * r_s = b
                            delta_b = || A * r_s  - b ||
         Filter by residual error delta_b
-        :return: 
+        :return:
             squared least solution r_s
         '''
         # Initial step: Get (#r_adjacent)

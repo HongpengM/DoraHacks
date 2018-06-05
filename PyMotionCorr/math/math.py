@@ -48,6 +48,23 @@ class Math(object):
         return lstsq(a, b)
 
     @staticmethod
+    def solve_linear_equation_once(b):
+        n = b.shape[0] * 2
+        n = int(np.sqrt(n))
+        n = np.max([n, int(b.shape[0] * 2 / n)])
+        m = int(n * (n - 1) / 2)
+        # Initial step: Get coefficient matrix
+        A = Math.initial_coeff_matrix(n)
+        assert A.shape[0] == b.shape[0]
+        r_s = lstsq(A, b)[0]
+
+        r_error = np.dot(A, r_s) - b
+        delta_b = np.zeros((r_error.shape[0],))
+        for i in range(len(delta_b)):
+            delta_b[i] = np.sqrt(r_error[i, 0] ** 2 + r_error[i, 1] ** 2)
+        return r_s, A, delta_b
+
+    @staticmethod
     def iterative_solve_linear_equation(b, threshold=1):
         '''
         Iteratively Solve: A * r_s = b

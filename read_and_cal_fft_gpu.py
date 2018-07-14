@@ -3,9 +3,9 @@ from PyMotionCorr.mrc.mrc import Mrc as mrc
 from PyMotionCorr.math.math import Math
 import pickle
 from PyMotionCorr.utils.display import print_time
-import arrayfire as af
+import cupy as cp
 
-af.set_backend('cuda')
+
 math = Math()
 mrc1 = mrc.open('data\\test_cropped.mrc')
 print(mrc1.mrc.data.shape)

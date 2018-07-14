@@ -13,7 +13,7 @@ from scipy.ndimage import fourier_shift
 from skimage import img_as_float
 from skimage._shared import testing
 
-from cupy.testing import assert_allclose
+from cupy.testing import assert_allclose, assert_array_almost_equal
 
 
 def assertRaises(self, exc_type, func, *args, **kwargs):
@@ -52,10 +52,9 @@ class TestRegisterTranslation(unittest.TestCase):
         b = _upsampled_dft(raw_data, raw_data.shape)
         t2 = time.time()
         print(t1 - t0, 's  ', t2 - t1, 's')
-        print(a.dtype)
-        print(b.dtype)
+
         from numpy.testing import assert_allclose
-        assert_allclose(a.asnumpy(), b)
+        assert_array_almost_equal(a, b)
 
     def test_correlation(self):
 
@@ -68,7 +67,6 @@ class TestRegisterTranslation(unittest.TestCase):
         result, error, diffphase = register_translation_cu(reference_image,
                                                            shifted_image,
                                                            space="fourier")
-        print(result)
         assert_allclose(result[:2], -cp.array(shift))
 
     def test_subpixel_precision(self):
@@ -84,11 +82,11 @@ class TestRegisterTranslation(unittest.TestCase):
         assert_allclose(result[:2], -cp.array(subpixel_shift), atol=0.05)
 
     def test_real_input(self):
-        reference_image = camera()
+        reference_image = cp.array(camera())
         subpixel_shift = (-2.4, 1.32)
         shifted_image = fourier_shift(
-            cp.fft.fftn(reference_image), subpixel_shift)
-        shifted_image = cp.fft.ifftn(shifted_image)
+            cp.asnumpy(cp.fft.fftn(reference_image)), subpixel_shift)
+        shifted_image = cp.fft.ifftn(cp.array(shifted_image))
 
         # subpixel precision
         result, error, diffphase = register_translation_cu(reference_image,
@@ -97,10 +95,13 @@ class TestRegisterTranslation(unittest.TestCase):
 
     def test_size_one_dimension_input(self):
         # take a strip of the input image
-        reference_image = cp.fft.fftn(camera()[:, 15]).reshape((-1, 1))
+        reference_image = cp.fft.fftn(
+            cp.array(camera())[:, 15]).reshape((-1, 1))
         subpixel_shift = (-2.4, 4)
-        shifted_image = fourier_shift(reference_image, subpixel_shift)
 
+        shifted_image = fourier_shift(
+            cp.asnumpy(reference_image), subpixel_shift)
+        shifted_image = cp.array(shifted_image)
         # subpixel precision
         result, error, diffphase = register_translation_cu(reference_image,
                                                            shifted_image, 100,
@@ -108,23 +109,25 @@ class TestRegisterTranslation(unittest.TestCase):
         assert_allclose(result[:2], -cp.array((-2.4, 0)), atol=0.05)
 
     def test_3d_input(self):
-        phantom = img_as_float(binary_blobs(length=32, n_dim=3))
+        phantom = cp.array(img_as_float(binary_blobs(length=32, n_dim=3)))
         reference_image = cp.fft.fftn(phantom)
         shift = (-2., 1., 5.)
-        shifted_image = fourier_shift(reference_image, shift)
-
+        shifted_image = fourier_shift(cp.asnumpy(reference_image), shift)
+        shifted_image = cp.array(shifted_image)
         result, error, diffphase = register_translation_cu(reference_image,
                                                            shifted_image,
                                                            space="fourier")
         assert_allclose(result, -cp.array(shift), atol=0.05)
         # subpixel precision not available for 3-D data
         subpixel_shift = (-2.3, 1., 5.)
-        shifted_image = fourier_shift(reference_image, subpixel_shift)
+        shifted_image = fourier_shift(
+            cp.asnumpy(reference_image), subpixel_shift)
+        shifted_image = cp.array(shifted_image)
         result, error, diffphase = register_translation_cu(reference_image,
                                                            shifted_image,
                                                            space="fourier")
         assert_allclose(result, -cp.array(shift), atol=0.5)
-        with testing.raises(NotImplementedError):
+        with self.assertRaises(NotImplementedError):
             register_translation_cu(
                 reference_image,
                 shifted_image, upsample_factor=100,
@@ -132,7 +135,7 @@ class TestRegisterTranslation(unittest.TestCase):
 
     def test_unknown_space_input(self):
         image = cp.ones((5, 5))
-        with testing.raises(ValueError):
+        with self.assertRaises(ValueError):
             register_translation_cu(
                 image, image,
                 space="frank")
@@ -141,30 +144,30 @@ class TestRegisterTranslation(unittest.TestCase):
         # Dimensionality mismatch
         image = cp.ones((5, 5, 1))
         template = cp.ones((5, 5))
-        with testing.raises(ValueError):
+        with self.assertRaises(ValueError):
             register_translation_cu(template, image)
 
         # Greater than 2 dimensions does not support subpixel precision
         #   (TODO: should support 3D at some point.)
         image = cp.ones((5, 5, 5))
         template = cp.ones((5, 5, 5))
-        with testing.raises(NotImplementedError):
+        with self.assertRaises(NotImplementedError):
             register_translation_cu(template, image, 2)
 
         # Size mismatch
         image = cp.ones((5, 5))
         template = cp.ones((4, 4))
-        with testing.raises(ValueError):
+        with self.assertRaises(ValueError):
             register_translation_cu(template, image)
 
     def test_mismatch_upsampled_region_size(self):
-        with testing.raises(ValueError):
+        with self.assertRaises(ValueError):
             _upsampled_dft_cu(
                 cp.ones((4, 4)),
                 upsampled_region_size=[3, 2, 1, 4])
 
     def test_mismatch_offsets_size(self):
-        with testing.raises(ValueError):
+        with self.assertRaises(ValueError):
             _upsampled_dft_cu(cp.ones((4, 4)), 3,
                               axis_offsets=[3, 2, 1, 4])
 

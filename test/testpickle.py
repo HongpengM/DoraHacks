@@ -1,11 +1,22 @@
 import pickle
+import unittest
 
-a = {'hello': 'world'}
 
-with open('filename.pickle', 'wb') as handle:
-    pickle.dump(a, handle, protocol=pickle.HIGHEST_PROTOCOL)
+class TestPickle(unittest.TestCase):
+    """docstring for TestPickle"""
+    @staticmethod
+    def testPickleRW():
 
-with open('filename.pickle', 'rb') as handle:
-    b = pickle.load(handle)
+        a = {'hello': 'world'}
 
-print(a == b)
+        with open('filename.pickle', 'wb') as handle:
+            pickle.dump(a, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open('filename.pickle', 'rb') as handle:
+            b = pickle.load(handle)
+
+        assert a == b
+
+
+if __name__ == '__main__':
+    unittest.main()

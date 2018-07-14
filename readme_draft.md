@@ -3,40 +3,40 @@ A python version of motion correction software tools for cyro-EM
 
 ## Hierarchy Structure
 ```python
-PyMotionCorr/          -----------------Module
+PyMotionCorr/          -------------------------------------Module
      cal_relative_offset.py
      docs.py
      read_and_cal_fft_gpu.py
      read_and_cal_offset.py
      test_import.py
-    test/          ---------------------Module
-         testmath.py
-         testmrc.py
-         testpickle.py
-         testregister_translation.py
-
     data/
 
-    PyMotionCorr/          -------------Module
+    PyMotionCorr/          ---------------------------------Module
          align.py
          dim.py
          para.py
          pymo.py
-        math/          -----------------Module
-             math.py
-             register_translation_gpu.py
-
-        utils/          ----------------Module
-             data.py
-             display.py
-
-        mrc/          ------------------Module
+        mrc/          --------------------------------------Module
              mrc.py
              mrcViewer.py
 
-        Core/          -----------------Module
+        Core/          -------------------------------------Module
              requirements.py
 
+        utils/          ------------------------------------Module
+             data.py
+             display.py
+
+        math/          -------------------------------------Module
+             math.py
+             register_translation_gpu.py
+
+
+    test/          -----------------------------------------Module
+         testmath.py
+         testmrc.py
+         testpickle.py
+         testregister_translation.py
 
 
 ```

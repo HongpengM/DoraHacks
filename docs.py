@@ -54,7 +54,7 @@ def docsOut(docdict, level=0):
     fileindent = ' ' * ((level + 1) * 4 + 1)
     if docdict['isModule']:
         output = indent + docdict['name'] + '/' + ' ' * 10
-        out += (output + (40 - len(output)) * '-' + 'Module') + '\n'
+        out += (output + (60 - len(output)) * '-' + 'Module') + '\n'
     else:
         output = indent + docdict['name'] + '/'
         out += (output) + '\n'
@@ -76,7 +76,7 @@ docs = folderRunner(osp.abspath('.'))
 print(docsOut(docs))
 # print(docsOut(docs))
 with open('readme_draft.md', 'w') as f:
-    out = '```python\n' + docsOut(docs)+'\n```'
+    out = '```python\n' + docsOut(docs) + '\n```'
     header = '''# PyMotionCorr
 A python version of motion correction software tools for cyro-EM
 
